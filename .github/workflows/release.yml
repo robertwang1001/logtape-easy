@@ -1,0 +1,83 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  release:
+    name: release and tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          release-type: node
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+
+  publish:
+    needs: release
+    if: needs.release.outputs.release_created
+    name: publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+
+      #   - name: Checkout
+      #     uses: actions/checkout@v4
+      #     if: ${{ steps.release.outputs.release_created }}
+
+      #   - name: Install pnpm
+      #     uses: pnpm/action-setup@v4
+      #     with:
+      #       run_install: false
+      #     if: ${{ steps.release.outputs.release_created }}
+
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     registry-url: 'https://registry.npmjs.org'
+      #     cache: pnpm
+      #   if: ${{ steps.release.outputs.release_created }}
+
+      # - name: Install dependencies
+      #   run: pnpm install --frozen-lockfile
+      #   if: ${{ steps.release.outputs.release_created }}
+
+      # - name: Publish to NPM
+      #   # The --no-git-checks flag is needed to bypass an issue with pnpm related to GitHub's detached HEAD state during releases.
+      #   run: pnpm publish --access public --no-git-checks
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #   if: ${{ steps.release.outputs.release_created }}
