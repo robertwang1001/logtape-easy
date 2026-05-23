@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 (2026-05-23)
+
+
+### Features
+
+* initial and basic ([0819714](https://github.com/robertwang1001/logtape-easy/commit/0819714cb670ccd97278a1939c7740ae209e7fed))
+
 ## [2.2.6](https://github.com/GloryWong/logger/compare/v2.2.5...v2.2.6) (2025-09-23)
 
 
