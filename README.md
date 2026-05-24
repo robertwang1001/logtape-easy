@@ -150,6 +150,7 @@ await configure({
 
 ```ts
 interface SetupLoggerOptions {
+  consoleSinkOptions?: ConsoleSinkOptions
   sinks?: Record<string, Sink>
   storage?: StorageLike
   env?: EnvLike
@@ -159,6 +160,10 @@ interface SetupLoggerOptions {
   onWarn?: (message: string) => void
 }
 ```
+
+### `consoleSinkOptions`
+
+Pass options to the built-in console sink. Reference [`ConsoleSinkOptions`](https://jsr.io/@logtape/logtape@2.1.1/doc/~/ConsoleSinkOptions) for the options details.
 
 ### `sinks`
 

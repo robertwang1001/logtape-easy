@@ -1,6 +1,5 @@
 import type { Config, Sink } from '@logtape/logtape'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { buildLoggerConfig, LOG_LEVEL_KEY, setupLogger, setupLoggerSync } from '../src/index.js'
 
 const configureMock = vi.hoisted(() => {
@@ -11,12 +10,17 @@ const configureSyncMock = vi.hoisted(() => {
   return vi.fn<(args: any) => void>()
 })
 
+const getConsoleSinkMock = vi.hoisted(() => {
+  return vi.fn<(args: any) => any>()
+})
+
 vi.mock('@logtape/logtape', async () => {
   const actual = await vi.importActual<typeof import('@logtape/logtape')>('@logtape/logtape')
   return {
     ...actual,
     configure: configureMock,
     configureSync: configureSyncMock,
+    getConsoleSink: getConsoleSinkMock,
   }
 })
 
@@ -40,6 +44,7 @@ describe('buildLoggerConfig', () => {
     configureMock.mockReset()
     configureMock.mockResolvedValue(undefined)
     configureSyncMock.mockReset()
+    getConsoleSinkMock.mockReset()
   })
 
   afterEach(() => {
@@ -106,7 +111,7 @@ describe('buildLoggerConfig', () => {
     })
 
     expect(Object.keys(config.sinks)).toEqual([])
-    expect(onWarn).toHaveBeenCalledTimes(1)
+    expect(onWarn).toHaveBeenCalledOnce()
     expect(onWarn.mock.calls[0][0]).toContain('Ignoring invalid')
     expect(onWarn.mock.calls[0][0]).toContain('loud')
     expect(onWarn.mock.calls[0][0]).toContain(LOG_LEVEL_KEY)
@@ -135,7 +140,7 @@ describe('buildLoggerConfig', () => {
     })
 
     expect(Object.keys(config.sinks)).toEqual([])
-    expect(onWarn).toHaveBeenCalledTimes(1)
+    expect(onWarn).toHaveBeenCalledOnce()
   })
 
   it('includes extra sinks in the root logger', () => {
@@ -190,6 +195,7 @@ describe('setupLogger', () => {
     configureMock.mockReset()
     configureMock.mockResolvedValue(undefined)
     configureSyncMock.mockReset()
+    getConsoleSinkMock.mockReset()
   })
 
   afterEach(() => {
@@ -202,7 +208,7 @@ describe('setupLogger', () => {
       env: {},
     })
 
-    expect(configureMock).toHaveBeenCalledTimes(1)
+    expect(configureMock).toHaveBeenCalledOnce()
 
     const arg = configureMock.mock.lastCall?.[0]
     expect(arg?.reset).toBe(true)
@@ -221,7 +227,7 @@ describe('setupLogger', () => {
       },
     })
 
-    expect(configureMock).toHaveBeenCalledTimes(1)
+    expect(configureMock).toHaveBeenCalledOnce()
 
     const arg = configureMock.mock.lastCall?.[0]
     expect(arg?.reset).toBe(true)
@@ -233,8 +239,9 @@ describe('setupLogger', () => {
 describe('setupLoggerSync', () => {
   beforeEach(() => {
     configureMock.mockReset()
-    configureMock.mockResolvedValue(undefined)
+    configureMock.mockReset()
     configureSyncMock.mockReset()
+    getConsoleSinkMock.mockReset()
   })
 
   afterEach(() => {
@@ -247,7 +254,7 @@ describe('setupLoggerSync', () => {
       env: {},
     })
 
-    expect(configureSyncMock).toHaveBeenCalledTimes(1)
+    expect(configureSyncMock).toHaveBeenCalledOnce()
     expect(configureMock).not.toHaveBeenCalled()
 
     const arg = configureSyncMock.mock.lastCall?.[0]
@@ -267,7 +274,7 @@ describe('setupLoggerSync', () => {
       },
     })
 
-    expect(configureSyncMock).toHaveBeenCalledTimes(1)
+    expect(configureSyncMock).toHaveBeenCalledOnce()
 
     const arg = configureSyncMock.mock.lastCall?.[0]
     expect(arg?.reset).toBe(true)
@@ -283,6 +290,34 @@ describe('setupLoggerSync', () => {
       })
     }).not.toThrow()
 
-    expect(configureSyncMock).toHaveBeenCalledTimes(1)
+    expect(configureSyncMock).toHaveBeenCalledOnce()
+  })
+})
+
+describe('getConsoleSink', () => {
+  beforeEach(() => {
+    configureMock.mockReset()
+    configureMock.mockReset()
+    configureSyncMock.mockReset()
+    getConsoleSinkMock.mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('pass console sink options', () => {
+    const consoleSinkOptions = {
+      formatter: () => [],
+    }
+
+    setupLoggerSync({
+      consoleSinkOptions,
+      env: {
+        LOG_LEVEL: 'debug',
+      },
+    })
+
+    expect(getConsoleSinkMock).toHaveBeenCalledExactlyOnceWith(consoleSinkOptions)
   })
 })

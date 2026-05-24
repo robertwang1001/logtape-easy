@@ -1,4 +1,4 @@
-import type { Config, LogLevel, Sink } from '@logtape/logtape'
+import type { Config, ConsoleSinkOptions, LogLevel, Sink } from '@logtape/logtape'
 import {
   configure,
   configureSync,
@@ -19,6 +19,11 @@ export interface StorageLike {
 export type EnvLike = Record<string, string | undefined>
 
 export interface SetupLoggerOptions {
+  /**
+   * Pass options to the built-in console sink. Reference [`ConsoleSinkOptions`](https://jsr.io/@logtape/logtape@2.1.1/doc/~/ConsoleSinkOptions) for the options details.
+   */
+  consoleSinkOptions?: ConsoleSinkOptions
+
   /**
    * Attach additional sinks beside the built-in console sink, such as Sentry, OTEL, file sinks, etc.
    *
@@ -120,7 +125,7 @@ export function buildLoggerConfig(
   const rootSinkNames: string[] = []
 
   if (preference.enabled) {
-    sinks.console = withFilter(getConsoleSink(), preference.level)
+    sinks.console = withFilter(getConsoleSink(options.consoleSinkOptions), preference.level)
     rootSinkNames.push('console')
   }
 
