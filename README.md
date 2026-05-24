@@ -150,8 +150,10 @@ await configure({
 
 ```ts
 interface SetupLoggerOptions {
-  consoleSinkOptions?: ConsoleSinkOptions
   sinks?: Record<string, Sink>
+  loggers?: LoggerConfig[]
+  filters?: Record<string, FilterLike>
+  consoleSinkOptions?: ConsoleSinkOptions
   storage?: StorageLike
   env?: EnvLike
   preferenceKey?: string
@@ -160,10 +162,6 @@ interface SetupLoggerOptions {
   onWarn?: (message: string) => void
 }
 ```
-
-### `consoleSinkOptions`
-
-Pass options to the built-in console sink. Reference [`ConsoleSinkOptions`](https://jsr.io/@logtape/logtape@2.1.1/doc/~/ConsoleSinkOptions) for the options details.
 
 ### `sinks`
 
@@ -178,6 +176,18 @@ await setupLogger({
   },
 })
 ```
+
+### `loggers`
+
+The additional loggers to configure. They will not overwrite the built-in loggers, i.e. root and meta loggers.
+
+### `filters`
+
+The filters to use.
+
+### `consoleSinkOptions`
+
+Pass options to the built-in console sink. Reference [`ConsoleSinkOptions`](https://jsr.io/@logtape/logtape@2.1.1/doc/~/ConsoleSinkOptions) for the options details.
 
 ### `storage`
 

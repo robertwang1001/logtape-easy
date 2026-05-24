@@ -1,4 +1,4 @@
-import type { Config, Sink } from '@logtape/logtape'
+import type { Config, LoggerConfig, Sink } from '@logtape/logtape'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildLoggerConfig, LOG_LEVEL_KEY, setupLogger, setupLoggerSync } from '../src/index.js'
 
@@ -239,7 +239,7 @@ describe('setupLogger', () => {
 describe('setupLoggerSync', () => {
   beforeEach(() => {
     configureMock.mockReset()
-    configureMock.mockReset()
+    configureMock.mockResolvedValue(undefined)
     configureSyncMock.mockReset()
     getConsoleSinkMock.mockReset()
   })
@@ -294,10 +294,10 @@ describe('setupLoggerSync', () => {
   })
 })
 
-describe('getConsoleSink', () => {
+describe('consoleSinkOptions', () => {
   beforeEach(() => {
     configureMock.mockReset()
-    configureMock.mockReset()
+    configureMock.mockResolvedValue(undefined)
     configureSyncMock.mockReset()
     getConsoleSinkMock.mockReset()
   })
@@ -306,11 +306,22 @@ describe('getConsoleSink', () => {
     vi.restoreAllMocks()
   })
 
-  it('pass console sink options', () => {
-    const consoleSinkOptions = {
-      formatter: () => [],
-    }
+  const consoleSinkOptions = {
+    formatter: () => [],
+  }
 
+  it('pass console sink options to async setup', async () => {
+    await setupLogger({
+      consoleSinkOptions,
+      env: {
+        LOG_LEVEL: 'debug',
+      },
+    })
+
+    expect(getConsoleSinkMock).toHaveBeenCalledExactlyOnceWith(consoleSinkOptions)
+  })
+
+  it('pass console sink options to sync setup', () => {
     setupLoggerSync({
       consoleSinkOptions,
       env: {
@@ -319,5 +330,89 @@ describe('getConsoleSink', () => {
     })
 
     expect(getConsoleSinkMock).toHaveBeenCalledExactlyOnceWith(consoleSinkOptions)
+  })
+})
+
+describe('filters', () => {
+  beforeEach(() => {
+    configureMock.mockReset()
+    configureMock.mockResolvedValue(undefined)
+    configureSyncMock.mockReset()
+    getConsoleSinkMock.mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const filters = {
+    test: () => true,
+  }
+
+  it('pass filters to async setup', async () => {
+    await setupLogger({
+      filters,
+    })
+
+    expect(configureMock).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      filters,
+    }))
+  })
+
+  it('pass filters to sync setup', () => {
+    setupLoggerSync({
+      filters,
+    })
+
+    expect(configureSyncMock).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      filters,
+    }))
+  })
+})
+
+describe('loggers', () => {
+  beforeEach(() => {
+    configureMock.mockReset()
+    configureMock.mockResolvedValue(undefined)
+    configureSyncMock.mockReset()
+    getConsoleSinkMock.mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const loggers: LoggerConfig<string, string>[] = [
+    {
+      category: 'test',
+      lowestLevel: 'debug',
+      sinks: ['console'],
+    },
+  ]
+
+  it('pass loggers to async setup', async () => {
+    await setupLogger({
+      loggers,
+    })
+
+    expect(configureMock).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      loggers: expect.arrayContaining(loggers),
+    }))
+
+    // Do not overrite built-in loggers
+    expect(configureMock.mock.lastCall?.[0]?.loggers?.length).toBe(3)
+  })
+
+  it('pass loggers to sync setup', () => {
+    setupLoggerSync({
+      loggers,
+    })
+
+    expect(configureSyncMock).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      loggers: expect.arrayContaining(loggers),
+    }))
+
+    // Do not overrite built-in loggers
+    expect(configureSyncMock.mock.lastCall?.[0]?.loggers?.length).toBe(3)
   })
 })

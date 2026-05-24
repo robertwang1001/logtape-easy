@@ -1,4 +1,4 @@
-import type { Config, ConsoleSinkOptions, LogLevel, Sink } from '@logtape/logtape'
+import type { Config, ConsoleSinkOptions, FilterLike, LoggerConfig, LogLevel, Sink } from '@logtape/logtape'
 import {
   configure,
   configureSync,
@@ -20,11 +20,6 @@ export type EnvLike = Record<string, string | undefined>
 
 export interface SetupLoggerOptions {
   /**
-   * Pass options to the built-in console sink. Reference [`ConsoleSinkOptions`](https://jsr.io/@logtape/logtape@2.1.1/doc/~/ConsoleSinkOptions) for the options details.
-   */
-  consoleSinkOptions?: ConsoleSinkOptions
-
-  /**
    * Attach additional sinks beside the built-in console sink, such as Sentry, OTEL, file sinks, etc.
    *
    * @example
@@ -39,6 +34,22 @@ export interface SetupLoggerOptions {
    * ```
    */
   sinks?: Record<string, Sink>
+
+  /**
+   * The additional loggers to configure.
+   * They will not overwrite the built-in loggers, i.e. root and meta loggers.
+   */
+  loggers?: LoggerConfig<string, string>[]
+
+  /**
+   * The filters to use.
+   */
+  filters?: Record<string, FilterLike>
+
+  /**
+   * Options passed to the built-in console sink. Reference [`ConsoleSinkOptions`](https://jsr.io/@logtape/logtape@2.1.1/doc/~/ConsoleSinkOptions) for the options details.
+   */
+  consoleSinkOptions?: ConsoleSinkOptions
 
   /**
    * Override storage access
@@ -146,6 +157,7 @@ export function buildLoggerConfig(
 
   return {
     sinks,
+    filters: options.filters,
     loggers: [
       {
         category: [],
@@ -161,6 +173,7 @@ export function buildLoggerConfig(
         lowestLevel: options.metaConsoleLevel ?? 'warning',
         parentSinks: 'override',
       },
+      ...(options.loggers ?? []),
     ],
   }
 }
@@ -177,11 +190,9 @@ export async function setupLogger(
 export function setupLoggerSync(
   options: SetupLoggerOptions = {},
 ): void {
-  const config = buildLoggerConfig(options)
-
   configureSync({
     reset: true,
-    ...config,
+    ...buildLoggerConfig(options),
   })
 }
 
