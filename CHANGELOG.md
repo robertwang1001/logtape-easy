@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/robertwang1001/logtape-easy/compare/v1.0.0...v1.1.0) (2026-05-24)
+
+
+### Features
+
+* support additional loggers and filters ([33cc633](https://github.com/robertwang1001/logtape-easy/commit/33cc6338a11b8ff3c0b7b9c841776533b63529a9))
+* support customize the built-in console sink by passing its options ([d893752](https://github.com/robertwang1001/logtape-easy/commit/d893752eb8c8cf1d61d7ac12661c610156038e79))
+
 ## 1.0.0 (2026-05-23)
 
 
