@@ -79,7 +79,7 @@
     "commit-msg": "pnpm commitlint --edit ${1}"
   },
   "lint-staged": {
-    "*": "pnpm lint:fix"
+    "*.{ts,js,tsx,jsx,json}": "eslint --fix"
   },
   "commitlint": {
     "extends": [

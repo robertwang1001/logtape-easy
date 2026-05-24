@@ -20,23 +20,63 @@ export type EnvLike = Record<string, string | undefined>
 
 export interface SetupLoggerOptions {
   /**
-   * App-owned sinks such as Sentry, OTEL, file sinks, etc.
+   * Attach additional sinks beside the built-in console sink, such as Sentry, OTEL, file sinks, etc.
+   *
+   * @example
+   * ```ts
+   * import { getSentrySink } from '@logtape/sentry'
+   *
+   * await setupLogger({
+   *  sinks: {
+   *   sentry: getSentrySink()
+   *  },
+   * })
+   * ```
    */
   sinks?: Record<string, Sink>
 
   /**
-   * Optional overrides for tests or unusual runtimes.
-   * @default localStorage
+   * Override storage access
+   * @default `localStorage`
+   *
+   * @example
+   * ```ts
+   * await setupLogger({
+   *  storage: {
+   *    getItem: key => (key === 'LOG_LEVEL' && import.meta.dev ? 'debug' : null)
+   *  },
+   * })
+   * ```
    */
   storage?: StorageLike
+
   /**
-   * Optional overrides for tests or unusual runtimes.
-   * @default process.env
+   * Override environment access.
+   * @default `process.env`
+   *
+   * @example
+   * ```ts
+   * await setupLogger({
+   *  env: {
+   *    LOG_LEVEL: process.env.NODE === 'producation' ? 'info' : 'debug',
+   *  },
+   * })
+   * ```
    */
   env?: EnvLike
 
   /**
    * @default `LOG_LEVEL`
+   *
+   * @example
+   * ```ts
+   * await setupLogger({
+   *  preferenceKey: 'APP_LOG_LEVEL',
+   *  env: {
+   *   APP_LOG_LEVEL: 'debug',
+   *  },
+   * })
+   * ```
    */
   preferenceKey?: string
 

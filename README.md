@@ -83,8 +83,8 @@ This makes browser-side overrides easy while still working naturally in server-s
 |---|---|
 | missing | console logging disabled |
 | `""` or whitespace | console logging disabled |
-| valid log level like `info` | console logging enabled |
-| uppercase like `DEBUG` | console logging enabled |
+| valid log level like `info` | console logging enabled at `info` level |
+| uppercase like `DEBUG` | console logging enabled at `debug` level |
 | invalid value | console logging disabled + warning |
 
 ## Browser usage
@@ -162,43 +162,45 @@ interface SetupLoggerOptions {
 
 ### `sinks`
 
-Attach additional sinks beside the built-in console sink.
+Attach additional sinks beside the built-in console sink, such as Sentry, OTEL, file sinks, etc.
 
 ```ts
+import { getSentrySink } from '@logtape/sentry'
+
 await setupLogger({
   sinks: {
-    audit: myAuditSink,
+    sentry: getSentrySink()
   },
 })
 ```
 
 ### `storage`
 
-Override storage access, mainly for tests or unusual runtimes.
+Override storage access. *(Default: `localStorage`)*
 
 ```ts
 await setupLogger({
   storage: {
-    getItem: key => (key === 'LOG_LEVEL' ? 'debug' : null),
+    getItem: key => (key === 'LOG_LEVEL' && import.meta.dev ? 'debug' : null)
   },
 })
 ```
 
 ### `env`
 
-Override environment access.
+Override environment access. *(Default: `process.env`)*
 
 ```ts
 await setupLogger({
   env: {
-    LOG_LEVEL: 'info',
+    LOG_LEVEL: process.env.NODE === 'producation' ? 'info' : 'debug',
   },
 })
 ```
 
 ### `preferenceKey`
 
-Use a different configuration key.
+Use a different configuration key. *(Default: `LOG_LEVEL`)*
 
 ```ts
 await setupLogger({
@@ -211,21 +213,15 @@ await setupLogger({
 
 ### `rootLevel`
 
-Sets the root logger minimum level when at least one sink is attached.
-
-Default: `trace`
+Sets the root logger minimum level when at least one sink is attached. *(Default: `trace`)*
 
 ### `metaConsoleLevel`
 
-Sets the LogTape meta logger level for the built-in console sink.
-
-Default: `warning`
+Sets the LogTape meta logger level for the built-in console sink. *(Default: `warning`)*
 
 ### `onWarn`
 
-Called when the configured log level is invalid.
-
-Default: `console.warn`
+Called when the configured log level is invalid. *(Default: `console.warn`)*
 
 ## Built-in console sink
 
@@ -279,7 +275,7 @@ logger.info('hello')
 ## Contributing
 
 Contributions are welcome! If you have ideas, bug fixes, or improvements, please open an issue or submit a pull request on the
-[GitHub repository](https://github.com/robertwang1001/tmpl-base).
+[GitHub repository](https://github.com/robertwang1001/logtape-easy).
 
 Give a ⭐️ if this project helped you!
 
