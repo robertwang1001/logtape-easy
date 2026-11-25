@@ -2,7 +2,7 @@
   "name": "logtape-easy",
   "type": "module",
   "version": "1.1.0",
-  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
+  "packageManager": "pnpm@12.23.0+sha512.02da94ffaf133f46074322afe552f90d40b5f71ae259aefbccdacc5085b1d617e98d65e0131f5748b9b67445978ee5055d7d59a473f1eef0d504854fefcd5975",
   "description": "A small LogTape helper for apps that provides out-of-the-box logging with a built-in console sink and minimal setup.",
   "author": {
     "name": "robertwang1001",
